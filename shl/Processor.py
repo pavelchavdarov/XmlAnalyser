@@ -1,6 +1,6 @@
 import xml.etree.ElementTree
-from tkinter import *
-from tkinter.ttk import *
+import tkinter
+from tkinter import ttk
 
 def check_xml(xmlfile, configfile):
     e = xml.etree.ElementTree.parse(xmlfile).getroot()
@@ -39,14 +39,10 @@ def check_xml(xmlfile, configfile):
     return {'errors': shareh_errors, 'sums': tag_sums}
 
 if __name__ == '__main__':
-    root = Tk()
-    btn = Button(root,  # родительское окно
-                 text="Click me",  # надпись на кнопке
-                 width=30, height=5,  # ширина и высота
-                 bg="white", fg="black")  # цвет фона и надписи
-    btn.pack()  # расположить кнопку на главном окне
+    root = tkinter.Tk()
+    button = ttk.Button(root)
+    button.pack()
     root.mainloop()
-
     result = check_xml('C:\\Users\\p.chavdarov\\Downloads\\03.11.2016.xml', 'cfg.txt')
 
     print(result['sums'])
