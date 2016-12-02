@@ -1,36 +1,43 @@
 import xml.etree.ElementTree
 
-e = xml.etree.ElementTree.parse('C:\\Users\\p.chavdarov\\Downloads\\03.11.2016.xml').getroot()
+def check_xml(xmlfile, configfile):
+    e = xml.etree.ElementTree.parse(xmlfile).getroot()
 
-# madatory_tags = ['country', 'address', 'individual_document_type_code']
-config_tags = {'madatory_tags':''}
-lines = {}
-with open('C:\\Users\\p.chavdarov\\Downloads\\cfg.txt') as f:
-    lines = f.read().splitlines()
+    config_tags = {'madatory_tags': '', 'sum_tags': ''}
 
-lines = set(filter(lambda x: not x.startswith('#'), lines))
+    f = open(configfile)
+    # фильтруем комментарии
+    lines = set(filter(lambda x: not x.startswith('#'), f.read().splitlines()))
 
-for l in lines:
-    par =  l.partition('=')
-    tag = par[0].strip()
-    value = par[2].strip()
-    if tag in config_tags and len(value) > 0:
-        config_tags[tag] = list(map(lambda x: x.strip(), value.split(',')))
+    for l in lines:
+        par =  l.partition('=')
+        tag = par[0].strip()
+        value = par[2].strip()
+        if tag in config_tags and len(value) > 0:
+            config_tags[tag] = list(map(lambda x: x.strip(), value.split(',')))
 
-print(config_tags)
+    print(config_tags)
 
+    tag_sums = dict()
+    shareh_errors = dict()
 
+    for shareh in e.find('register_list').findall('shareholder'):
+        shreholder_name = shareh.find('./shareholder_info/shareholder_dtls/name').text
+        for i in shareh.iter():
+            dummy = 0
+            if not i.text and i.tag in config_tags['madatory_tags']:
+                if shreholder_name not in shareh_errors:
+                    shareh_errors[shreholder_name] = list()
+                    shareh_errors[shreholder_name].append(i.tag)
+                else:
+                    shareh_errors[shreholder_name].append(i.tag)
+            if i.tag in config_tags['sum_tags']:
+                if i.tag not in tag_sums:
+                    tag_sums[i.tag] = int(i.text)
+                else:
+                    tag_sums[i.tag] = int(tag_sums[i.tag]) + int(i.text)
 
-UnitSum = 0
-for shareh in e.find('register_list').findall('shareholder'):
-    for i in shareh.iter():
-        dummy = 0
-        if not i.text and i.tag in config_tags['madatory_tags']:
-            dummy = dummy + 1
-            if dummy == 1:
-                print('Владалец: ', shareh.find('./shareholder_info/shareholder_dtls/name').text)
-            print(i.tag)
+    print(tag_sums)
+    print(shareh_errors)
 
-    UnitSum = UnitSum + int(shareh.find('./security_balances/security_balance/total/units').text)
-
-print('UnitSum: ', UnitSum )
+check_xml('C:\\Users\\p.chavdarov\\Downloads\\03.11.2016.xml', 'C:\\Users\\p.chavdarov\\Downloads\\cfg.txt')
