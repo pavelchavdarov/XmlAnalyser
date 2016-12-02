@@ -1,0 +1,6 @@
+# mandatory tags
+madatory_tags = country, address, individual_document_type_code, index
+sum_tags = units
+
+#всякая хрень
+qwe = rty
